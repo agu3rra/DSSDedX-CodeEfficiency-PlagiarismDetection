@@ -4,4 +4,4 @@ The initially provided code that detects plagiarism on texts needs to have its r
 If the code takes more than 60 seconds to run on the grading platform (Codio), you get 0.
 
 ## Secondary learning objective
-Learn how to use GitHub to perform version rollbacks.
+Learn how to use GitHub to perform version rollbacks. [COMPLETED. :)]
