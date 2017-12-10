@@ -1,6 +1,7 @@
 
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -31,16 +32,13 @@ public class PlagiarismDetector {
 			for (int j = 0; j < files.length; j++) { 
 				String file2 = files[j];
 				
-				Set<String> file1Phrases = createPhrases(dirName + "/" + file1, windowSize); 
+				Set<String> file1Phrases = createPhrases(dirName + "/" + file1, windowSize);
+				if (file1Phrases == null) return null;
 				Set<String> file2Phrases = createPhrases(dirName + "/" + file2, windowSize); 
-				
-				if (file1Phrases == null || file2Phrases == null)
-					return null;
+				if (file2Phrases == null) return null;
 				
 				Set<String> matches = findMatches(file1Phrases, file2Phrases);
-				
-				if (matches == null)
-					return null;
+				if (matches == null) return null;
 								
 				if (matches.size() > threshold) {
 					String key = file1 + "-" + file2;
@@ -52,6 +50,7 @@ public class PlagiarismDetector {
 			
 		}		
 		
+		// consider adding to a tree so that you don't have to sort at the end.
 		return sortResults(numberOfMatches);
 
 	}
@@ -64,7 +63,7 @@ public class PlagiarismDetector {
 	protected static List<String> readFile(String filename) {
 		if (filename == null) return null;
 		
-		List<String> words = new LinkedList<String>();
+		List<String> words = new ArrayList<String>(); // a linked list will cause looking for the word in the list O(n) - convert to TreeSet to make it O(log2n)?
 		
 		try {
 			Scanner in = new Scanner(new File(filename));
@@ -139,6 +138,7 @@ public class PlagiarismDetector {
 		// the results, it is necessary to make a copy of the original Map
 		Map<String, Integer> copy = new HashMap<String, Integer>();
 
+		// Is there a Java API for copying possibleMatches into copy?
 		for (String key : possibleMatches.keySet()) {
 			copy.put(key, possibleMatches.get(key));
 		}	
@@ -149,8 +149,9 @@ public class PlagiarismDetector {
 			int maxValue = 0;
 			String maxKey = null;
 			for (String key : copy.keySet()) {
-				if (copy.get(key) > maxValue) {
-					maxValue = copy.get(key);
+				int copyValue = copy.get(key);
+				if (copyValue > maxValue) {
+					maxValue = copyValue;
 					maxKey = key;
 				}
 			}
@@ -167,21 +168,21 @@ public class PlagiarismDetector {
 	 * This method is here to help you measure the execution time and get the output of the program.
 	 * You do not need to consider it for improving the efficiency of the detectPlagiarism method.
 	 */
-    public static void main(String[] args) {
-    	if (args.length == 0) {
-    		System.out.println("Please specify the name of the directory containing the corpus.");
-    		System.exit(0);
-    	}
-    	String directory = args[0];
-    	long start = System.currentTimeMillis();
-    	Map<String, Integer> map = PlagiarismDetector.detectPlagiarism(directory, 4, 5);
-    	long end = System.currentTimeMillis();
-    	double timeInSeconds = (end - start) / (double)1000;
-    	System.out.println("Execution time (wall clock): " + timeInSeconds + " seconds");
-    	Set<Map.Entry<String, Integer>> entries = map.entrySet();
-    	for (Map.Entry<String, Integer> entry : entries) {
-    		System.out.println(entry.getKey() + ": " + entry.getValue());
-    	}
-    }
+	public static void main(String[] args) {
+		if (args.length == 0) {
+			System.out.println("Please specify the name of the directory containing the corpus.");
+			System.exit(0);
+		}
+		String directory = args[0];
+		long start = System.currentTimeMillis();
+		Map<String, Integer> map = PlagiarismDetector.detectPlagiarism(directory, 4, 5);
+		long end = System.currentTimeMillis();
+		double timeInSeconds = (end - start) / (double)1000;
+		System.out.println("Execution time (wall clock): " + timeInSeconds + " seconds");
+		Set<Map.Entry<String, Integer>> entries = map.entrySet();
+		for (Map.Entry<String, Integer> entry : entries) {
+			System.out.println(entry.getKey() + ": " + entry.getValue());
+		}
+	}
 
 }
