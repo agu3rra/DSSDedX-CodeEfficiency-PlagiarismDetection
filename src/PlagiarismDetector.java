@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 /*
  * SD2x Homework #11
@@ -25,33 +27,38 @@ public class PlagiarismDetector {
 		String[] files = dirFile.list();
 		
 		Map<String, Integer> numberOfMatches = new HashMap<String, Integer>();
+//		Map<String, Integer> numberOfMatches = new TreeMap<String, Integer>();
 		
-		for (int i = 0; i < files.length; i++) {
-			String file1 = files[i];
-
-			for (int j = 0; j < files.length; j++) { 
-				String file2 = files[j];
+		// Checking for matches on the same document and then ignoring it at the end of the subroutine.
+		// Consider either controlling the indexes (remove check when i == j)
+		// Better alternative: check indexes on the top of the main diagonal only!!!
+		for (int i = 0; i < files.length-1; i++) {
+			for (int j = i+1; j < files.length; j++) {
 				
-				Set<String> file1Phrases = createPhrases(dirName + "/" + file1, windowSize);
-				if (file1Phrases == null) return null;
-				Set<String> file2Phrases = createPhrases(dirName + "/" + file2, windowSize); 
-				if (file2Phrases == null) return null;
-				
-				Set<String> matches = findMatches(file1Phrases, file2Phrases);
-				if (matches == null) return null;
-								
-				if (matches.size() > threshold) {
+					String file1 = files[i];
+					String file2 = files[j];
 					String key = file1 + "-" + file2;
-					if (numberOfMatches.containsKey(file2 + "-" + file1) == false && file1.equals(file2) == false) {
+//					if (numberOfMatches.containsKey(file2 + "-" + file1)) continue; // this will never happen
+					
+					Set<String> file1Phrases = createPhrases(dirName + "/" + file1, windowSize);
+					if (file1Phrases == null) return null;
+					Set<String> file2Phrases = createPhrases(dirName + "/" + file2, windowSize); 
+					if (file2Phrases == null) return null;
+
+					Set<String> matches = findMatches(file1Phrases, file2Phrases);
+					if (matches == null) return null;
+
+					if (matches.size() > threshold) {
 						numberOfMatches.put(key,matches.size());
-					}
-				}				
+					}		
+				
 			}
 			
 		}		
 		
 		// consider adding to a tree so that you don't have to sort at the end.
 		return sortResults(numberOfMatches);
+//		return numberOfMatches;
 
 	}
 
@@ -69,6 +76,7 @@ public class PlagiarismDetector {
 			Scanner in = new Scanner(new File(filename));
 			while (in.hasNext()) {
 				words.add(in.next().replaceAll("[^a-zA-Z]", "").toUpperCase());
+//				words.add(in.next().replaceAll("[^a-zA-Z]", "").toLowerCase());
 //				words.add(in.next().replaceAll("[^a-zA-Z]", ""));
 			}
 		}
@@ -87,10 +95,12 @@ public class PlagiarismDetector {
 	 */
 	protected static Set<String> createPhrases(String filename, int window) {
 		if (filename == null || window < 1) return null;
+//		if (window < 1 || filename == null) return null; // exchanged places on OR check. fileName == null seem less likely to occur.
 				
 		List<String> words = readFile(filename);
 		
 		Set<String> phrases = new HashSet<String>();
+//		Set<String> phrases = new TreeSet<String>();
 		
 		for (int i = 0; i < words.size() - window + 1; i++) {
 			String phrase = "";
