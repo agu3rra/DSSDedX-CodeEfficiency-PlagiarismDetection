@@ -69,6 +69,7 @@ public class PlagiarismDetector {
 			Scanner in = new Scanner(new File(filename));
 			while (in.hasNext()) {
 				words.add(in.next().replaceAll("[^a-zA-Z]", "").toUpperCase());
+//				words.add(in.next().replaceAll("[^a-zA-Z]", ""));
 			}
 		}
 		catch (Exception e) {
@@ -119,7 +120,7 @@ public class PlagiarismDetector {
 		
 			for (String mine : myPhrases) {
 				for (String yours : yourPhrases) {
-					if (mine.equalsIgnoreCase(yours)) {
+					if (mine.equals(yours)) {
 						matches.add(mine);
 					}
 				}
